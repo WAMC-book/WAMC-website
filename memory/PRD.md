@@ -43,6 +43,12 @@ User will deploy to GitHub + Vercel (frontend) + Supabase (DB) later.
 - Testimonials (3 placeholder quotes — user to replace with real ones).
 - All interactive elements have `data-testid` attributes.
 
+## What's been implemented (2026-04 — French translation rollout, iteration 3)
+- Expanded `/app/frontend/src/lib/i18n.js` with a full FR/EN dictionary covering: nav, CTAs, hero, Home (7 sections incl. problem / why / explore items / sample / about short / resources preview cards), Book (hero / core idea / gap / gains / sample / testimonials / formats / CTA), Resources (header + 3 cards + CTA), Tools (header + note + CTA), About (bio + CTA), Contact (full form copy), CTA section defaults, footer, testimonials, login, admin.
+- Rewrote `Home.jsx`, `Book.jsx`, `Resources.jsx`, `Tools.jsx`, `About.jsx`, `Contact.jsx`, and `CTASection.jsx` to pull every visible string from `useLang().t.*` (no more hardcoded EN on translated pages).
+- Quotes page inline EN/FR copy preserved; final CTA on Quotes now uses i18n defaults.
+- Verified end-to-end by toggling FR in the live preview — all headlines render in French (LE LIVRE, RESSOURCES, OUTILS, À PROPOS DE L'AUTEUR, CONTACT), along with nav, buttons, form labels, sub-copy, and format/language metadata ("Imprimé · Autres formats à venir").
+
 ## What's been implemented (2026-04 — Supabase migration, iteration 2, 24/24 backend tests passing)
 - Migrated data layer from MongoDB (motor) → Supabase Postgres (SQLAlchemy async + asyncpg).
 - Added `/app/backend/database.py` (async engine w/ `statement_cache_size=0` for transaction pooler), `/app/backend/models.py` (Lead, ContactMessage ORM).
@@ -64,7 +70,7 @@ User will deploy to GitHub + Vercel (frontend) + Supabase (DB) later.
 - Swap Amazon URL + PDF + contact details + real testimonials.
 
 ### P1 (next phase)
-- Wire the full French translation copy into `i18n.js` across all pages (infra exists, copy is pending — user provided it in a previous session but it still needs to be mapped). [PAUSED at user request — tackle after current priorities]
+- Wire translated strings into `Quotes.jsx` inline `copy` object via `t.quotes.*` keys (currently hardcoded inline for EN/FR — works, but centralizing it would match the rest of the app).
 - Email automation: send lead the PDF via Resend/SendGrid instead of direct browser download.
 - Admin view: add CSV export of leads.
 - Real article + quote content for Resources page (currently "Coming soon").

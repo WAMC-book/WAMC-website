@@ -6,17 +6,16 @@ import CTASection from "@/components/CTASection";
 import TestimonialsGrid from "@/components/TestimonialsGrid";
 import useAmazonUrl from "@/lib/useAmazonUrl";
 import { BOOK, AUTHOR } from "@/lib/constants";
-
-const GAINS = [
-  "a clearer understanding of who your clients really are",
-  "a stronger awareness of the buying decisions in front of you",
-  "better alignment between what you offer and who it is for",
-  "more intentional communication with the people you want to reach",
-];
+import { useLang } from "@/lib/LanguageContext";
 
 export default function Book() {
   const [open, setOpen] = useState(false);
   const { primary: amazonUrl, alt: amazonAlt, altLabel } = useAmazonUrl();
+  const { t, lang } = useLang();
+
+  const formatLabel = lang === "fr"
+    ? "Imprimé · Autres formats à venir"
+    : BOOK.format;
 
   return (
     <div data-testid="book-page" className="bg-white">
@@ -34,21 +33,20 @@ export default function Book() {
             <div className="flex items-center gap-3 mb-5">
               <span className="rule-accent" />
               <span className="uppercase text-[11px] tracking-[0.22em] text-[var(--brand-muted)]">
-                The book
+                {t.book.eyebrow}
               </span>
             </div>
             <h1
               data-testid="book-headline"
               className="hero-title font-display uppercase text-[44px] sm:text-6xl lg:text-7xl leading-[0.92] text-[var(--brand-ink)]"
             >
-              The <span className="text-[var(--brand-blue)]">book</span>
+              {t.book.title1} <span className="text-[var(--brand-blue)]">{t.book.title_blue}</span>
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-[var(--brand-dark)] mt-6 leading-relaxed max-w-lg">
-              A practical starting point if you want to better understand your
-              clients — before you build, pitch, or scale anything else.
+              {t.book.subtitle}
             </p>
             <p className="text-sm text-[var(--brand-muted)] uppercase tracking-widest mt-4">
-              By {AUTHOR.name}
+              {t.hero.eyebrow.replace(/^By /, lang === "fr" ? "Par " : "By ")}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-9">
@@ -59,7 +57,7 @@ export default function Book() {
                 data-testid="book-buy-btn"
                 className="btn-primary inline-flex items-center justify-center h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
               >
-                Buy now <ArrowRight size={16} className="ml-2" />
+                {t.cta.buyNow} <ArrowRight size={16} className="ml-2" />
               </a>
               <button
                 type="button"
@@ -67,7 +65,7 @@ export default function Book() {
                 data-testid="book-chapters-btn"
                 className="btn-ghost-dark inline-flex items-center justify-center gap-2 h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
               >
-                <Download size={16} /> Get the first 3 chapters
+                <Download size={16} /> {t.cta.getChapters}
               </button>
             </div>
 
@@ -78,20 +76,20 @@ export default function Book() {
               data-testid="book-buy-btn-alt"
               className="mt-4 inline-block text-[11px] uppercase tracking-widest text-[var(--brand-muted)] hover:text-[var(--brand-blue)] transition-colors"
             >
-              Also on {altLabel} →
+              {t.cta.alsoOn} {altLabel} →
             </a>
 
             <dl className="mt-10 grid grid-cols-3 gap-4 sm:gap-6 border-t border-[var(--brand-border)] pt-6 text-sm">
               <div>
-                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">Pages</dt>
+                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">{t.book.pages}</dt>
                 <dd className="font-display text-xl sm:text-2xl text-[var(--brand-ink)] mt-1">{BOOK.pages}</dd>
               </div>
               <div>
-                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">Format</dt>
-                <dd className="font-display text-sm sm:text-base text-[var(--brand-ink)] mt-1 leading-snug">{BOOK.format}</dd>
+                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">{t.book.format}</dt>
+                <dd className="font-display text-sm sm:text-base text-[var(--brand-ink)] mt-1 leading-snug">{formatLabel}</dd>
               </div>
               <div>
-                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">Language</dt>
+                <dt className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[var(--brand-muted)]">{t.book.language}</dt>
                 <dd className="font-display text-xl sm:text-2xl text-[var(--brand-ink)] mt-1">{BOOK.language}</dd>
               </div>
             </dl>
@@ -107,18 +105,18 @@ export default function Book() {
         <div className="max-w-[960px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl lg:text-6xl leading-[0.95] text-[var(--brand-ink)] mb-8">
-            Your business cannot exist without <span className="text-[var(--brand-blue)]">clients</span>
+            {t.book.coreIdea.title1}{" "}
+            <span className="text-[var(--brand-blue)]">{t.book.coreIdea.title_blue}</span>
           </h2>
           <div className="space-y-5 text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)] max-w-2xl">
-            <p>Your business moves forward when people see value in what you offer.</p>
+            <p>{t.book.coreIdea.p1}</p>
             <p className="text-[var(--brand-muted)]">
-              Not when your idea is good.<br />
-              Not when your product is complete.<br />
-              But when a real person recognizes a need and decides to act.
+              {t.book.coreIdea.p2a}<br />
+              {t.book.coreIdea.p2b}<br />
+              {t.book.coreIdea.p2c}
             </p>
             <p className="text-[var(--brand-ink)] font-medium">
-              Understanding that person is not optional.
-              It is central to everything that follows.
+              {t.book.coreIdea.p3a} {t.book.coreIdea.p3b}
             </p>
           </div>
         </div>
@@ -133,17 +131,14 @@ export default function Book() {
           <div className="md:col-span-5">
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)]">
-              Most entrepreneurs do not know their <span className="text-[var(--brand-blue)]">clients</span>
+              {t.book.gap.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.book.gap.title_blue}</span>
             </h2>
           </div>
           <div className="md:col-span-7 space-y-5 text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)]">
-            <p>
-              You may have become an expert in what you offer. But that expertise
-              does not automatically extend to understanding the people you are
-              trying to reach.
-            </p>
+            <p>{t.book.gap.p1}</p>
             <p className="text-[var(--brand-ink)] font-medium">
-              This book was written to close that gap.
+              {t.book.gap.p2}
             </p>
           </div>
         </div>
@@ -157,10 +152,11 @@ export default function Book() {
         <div className="max-w-[1100px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] mb-10 md:mb-12 max-w-2xl">
-            What you will <span className="text-[var(--brand-blue)]">gain</span>
+            {t.book.gains.title1}{" "}
+            <span className="text-[var(--brand-blue)]">{t.book.gains.title_blue}</span>
           </h2>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            {GAINS.map((g, i) => (
+            {t.book.gains.items.map((g, i) => (
               <li
                 key={i}
                 data-testid={`gain-${i}`}
@@ -185,11 +181,11 @@ export default function Book() {
           <div className="md:col-span-7">
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-6">
-              Read before you <span className="text-[var(--brand-blue)]">commit</span>
+              {t.book.sample.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.book.sample.title_blue}</span>
             </h2>
             <p className="text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)] mb-8 max-w-lg">
-              Download the first 3 chapters and decide for yourself whether this
-              approach resonates with how you want to build your business.
+              {t.book.sample.body}
             </p>
             <button
               type="button"
@@ -197,7 +193,7 @@ export default function Book() {
               data-testid="sample-btn"
               className="btn-primary inline-flex items-center gap-2 h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
             >
-              <Download size={16} /> Download the first 3 chapters
+              <Download size={16} /> {t.cta.downloadChapters}
             </button>
           </div>
           <div className="md:col-span-5 flex justify-center md:justify-end">
@@ -214,7 +210,7 @@ export default function Book() {
         <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-12 md:mb-14 max-w-3xl">
-            Readers
+            {t.book.testimonialsTitle}
           </h2>
           <TestimonialsGrid testPrefix="book-testimonial" />
         </div>
@@ -228,17 +224,17 @@ export default function Book() {
         <div className="max-w-[900px] mx-auto px-6 lg:px-10 text-center">
           <span className="rule-accent mb-5 inline-block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-8">
-            Formats
+            {t.book.formats.title}
           </h2>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-10 text-[var(--brand-dark)]">
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-[var(--brand-blue)]" />
-              <span className="font-display uppercase text-lg sm:text-xl">Print available</span>
+              <span className="font-display uppercase text-lg sm:text-xl">{t.book.formats.printAvailable}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-[var(--brand-muted)]" />
               <span className="font-display uppercase text-lg sm:text-xl text-[var(--brand-muted)]">
-                Other formats coming
+                {t.book.formats.otherComing}
               </span>
             </div>
           </div>
@@ -246,8 +242,8 @@ export default function Book() {
       </section>
 
       <CTASection
-        title="Read before you buy."
-        subtitle="The first 3 chapters will tell you if this book belongs on your shelf."
+        title={t.book.ctaTitle}
+        subtitle={t.book.ctaSubtitle}
       />
 
       <ChapterDownloadModal open={open} onOpenChange={setOpen} />

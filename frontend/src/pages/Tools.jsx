@@ -3,7 +3,7 @@ import { useLang } from "@/lib/LanguageContext";
 import CTASection from "@/components/CTASection";
 
 export default function Tools() {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const TOOLS = lang === "fr" ? TOOLS_FR : TOOLS_EN;
   return (
     <div data-testid="tools-page">
@@ -15,10 +15,10 @@ export default function Tools() {
             data-testid="tools-headline"
             className="font-display uppercase text-5xl md:text-6xl lg:text-7xl leading-[0.92] text-[var(--brand-ink)]"
           >
-            Tools
+            {t.tools.title}
           </h1>
           <p className="text-lg md:text-xl text-[var(--brand-dark)] mt-6 max-w-2xl leading-relaxed">
-            Practical resources to help define your ideal client.
+            {t.tools.subtitle}
           </p>
         </div>
       </section>
@@ -27,10 +27,10 @@ export default function Tools() {
       <section className="pb-24 md:pb-32">
         <div className="max-w-[1100px] mx-auto px-6 lg:px-10">
           <ol className="divide-y divide-[var(--brand-border)] border-y border-[var(--brand-border)]">
-            {TOOLS.map((t, i) => (
+            {TOOLS.map((tool, i) => (
               <li
-                key={t.id}
-                data-testid={`tool-${t.id}`}
+                key={tool.id}
+                data-testid={`tool-${tool.id}`}
                 className="py-7 grid grid-cols-12 gap-4 items-baseline group hover:bg-[var(--brand-bg-soft)] -mx-3 px-3 rounded transition-colors"
               >
                 <span className="col-span-2 md:col-span-1 font-display text-xl text-[var(--brand-blue)]">
@@ -38,10 +38,10 @@ export default function Tools() {
                 </span>
                 <div className="col-span-10 md:col-span-11">
                   <h3 className="font-display uppercase text-2xl md:text-3xl text-[var(--brand-ink)] leading-tight">
-                    {t.name}
+                    {tool.name}
                   </h3>
                   <p className="text-[var(--brand-muted)] text-[15px] md:text-base mt-2 leading-relaxed max-w-2xl">
-                    {t.description}
+                    {tool.description}
                   </p>
                 </div>
               </li>
@@ -49,14 +49,14 @@ export default function Tools() {
           </ol>
 
           <p className="mt-12 text-sm text-[var(--brand-muted)] italic max-w-2xl">
-            Each tool is designed to be used alongside the book. Full, downloadable versions are being prepared.
+            {t.tools.note}
           </p>
         </div>
       </section>
 
       <CTASection
-        title="Tools work better with the book."
-        subtitle="Start by reading the first 3 chapters."
+        title={t.tools.ctaTitle}
+        subtitle={t.tools.ctaSubtitle}
       />
     </div>
   );

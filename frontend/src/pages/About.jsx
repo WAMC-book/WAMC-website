@@ -1,7 +1,9 @@
 import CTASection from "@/components/CTASection";
 import { AUTHOR } from "@/lib/constants";
+import { useLang } from "@/lib/LanguageContext";
 
 export default function About() {
+  const { t } = useLang();
   return (
     <div data-testid="about-page">
       {/* HEADER */}
@@ -12,7 +14,7 @@ export default function About() {
             data-testid="about-headline"
             className="font-display uppercase text-5xl md:text-6xl lg:text-7xl leading-[0.92] text-[var(--brand-ink)] max-w-4xl"
           >
-            About the author
+            {t.about.title}
           </h1>
         </div>
       </section>
@@ -41,24 +43,16 @@ export default function About() {
               {AUTHOR.name}
             </h2>
             <div className="space-y-5 text-[17px] leading-[1.75] text-[var(--brand-dark)]">
-              <p>
-                Antoine B. Carrière is an entrepreneur, coach, and facilitator
-                who has spent over two decades helping individuals move forward
-                with greater clarity in their work and decisions.
-              </p>
-              <p>
-                His work focuses on helping people better understand themselves,
-                the people they serve, and the choices they make in building
-                their careers and businesses.
-              </p>
+              <p>{t.about.p1}</p>
+              <p>{t.about.p2}</p>
             </div>
           </div>
         </div>
       </section>
 
       <CTASection
-        title="One question. A whole book."
-        subtitle="If this sounds like something you've been needing, start with the preview."
+        title={t.about.ctaTitle}
+        subtitle={t.about.ctaSubtitle}
       />
     </div>
   );

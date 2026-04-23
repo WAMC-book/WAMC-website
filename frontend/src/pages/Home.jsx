@@ -8,41 +8,16 @@ import TestimonialsGrid from "@/components/TestimonialsGrid";
 import useAmazonUrl from "@/lib/useAmazonUrl";
 import { useLang } from "@/lib/LanguageContext";
 
-const EXPLORE = [
-  "why you may be struggling to clearly define your clients",
-  "what is missing in how client understanding is usually approached",
-  "how to recognize the factors behind real buying decisions",
-  "how to integrate this thinking into your own business",
-];
-
-const RESOURCE_CARDS = [
-  {
-    icon: Wrench,
-    title: "Tools",
-    body: "Practical frameworks you can use to define and understand your clients.",
-    to: "/tools",
-    cta: "Access tools",
-  },
-  {
-    icon: FileText,
-    title: "Articles",
-    body: "Short reflections you can read in a single sitting.",
-    to: "/resources",
-    cta: "Read articles",
-  },
-  {
-    icon: Quote,
-    title: "Quotes",
-    body: "Lines from the book you can carry into your week.",
-    to: "/quotes",
-    cta: "View quotes",
-  },
-];
-
 export default function Home() {
   const [open, setOpen] = useState(false);
   const { primary: amazonUrl, alt: amazonAlt, altLabel } = useAmazonUrl();
   const { t } = useLang();
+
+  const RESOURCE_CARDS = [
+    { icon: Wrench, ...t.home.resourcesPreview.cards.tools, to: "/tools", key: "tools" },
+    { icon: FileText, ...t.home.resourcesPreview.cards.articles, to: "/resources", key: "articles" },
+    { icon: Quote, ...t.home.resourcesPreview.cards.quotes, to: "/quotes", key: "quotes" },
+  ];
 
   return (
     <div data-testid="home-page" className="bg-white">
@@ -53,18 +28,20 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-5 fade-up fade-up-1">
               <span className="rule-accent" />
               <span className="uppercase text-[11px] tracking-[0.22em] text-[var(--brand-muted)]">
-                By Antoine B. Carrière
+                {t.hero.eyebrow}
               </span>
             </div>
             <h1
               data-testid="hero-headline"
               className="hero-title font-display uppercase text-[44px] sm:text-[56px] lg:text-[76px] leading-[0.95] text-[var(--brand-ink)] tracking-tight fade-up fade-up-2"
             >
-              Most entrepreneurs know their <span className="text-[var(--brand-blue)]">offer</span> better than they know their <span className="text-[var(--brand-blue)]">clients</span>.
+              {t.hero.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.hero.title_offer}</span>{" "}
+              {t.hero.title2}{" "}
+              <span className="text-[var(--brand-blue)]">{t.hero.title_clients}</span>.
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-[var(--brand-dark)] mt-6 max-w-xl leading-relaxed fade-up fade-up-3">
-              Understand the people behind the buying decision — so you can
-              build, communicate, and grow with greater clarity.
+              {t.hero.subtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-9 fade-up fade-up-4">
@@ -75,7 +52,7 @@ export default function Home() {
                 data-testid="hero-buy-book-btn"
                 className="btn-primary inline-flex items-center justify-center h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
               >
-                Buy the book <ArrowRight size={16} className="ml-2" />
+                {t.cta.buy} <ArrowRight size={16} className="ml-2" />
               </a>
               <button
                 type="button"
@@ -83,7 +60,7 @@ export default function Home() {
                 data-testid="hero-get-chapters-btn"
                 className="btn-ghost-dark inline-flex items-center justify-center gap-2 h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
               >
-                <Download size={16} /> Download the first 3 chapters
+                <Download size={16} /> {t.cta.downloadChapters}
               </button>
             </div>
 
@@ -94,7 +71,7 @@ export default function Home() {
               data-testid="hero-buy-book-alt"
               className="mt-4 inline-block text-[11px] uppercase tracking-widest text-[var(--brand-muted)] hover:text-[var(--brand-blue)] transition-colors fade-up fade-up-5"
             >
-              Also on {altLabel} →
+              {t.cta.alsoOn} {altLabel} →
             </a>
           </div>
 
@@ -116,21 +93,23 @@ export default function Home() {
         <div className="max-w-[960px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl lg:text-6xl leading-[0.95] text-[var(--brand-ink)] mb-8">
-            Do you really know who your <span className="text-[var(--brand-blue)]">clients</span> are?
+            {t.home.problem.title1}{" "}
+            <span className="text-[var(--brand-blue)]">{t.home.problem.title_blue}</span>{" "}
+            {t.home.problem.title2}
           </h2>
           <div className="space-y-5 text-[17px] md:text-lg leading-[1.75] text-[var(--brand-dark)] max-w-2xl">
             <p>
-              You can probably describe your product or service in detail.
+              {t.home.problem.p1a}
               <br className="hidden sm:block" />
-              But can you clearly describe the person who decides to buy it?
+              {t.home.problem.p1b}
             </p>
             <p>
-              You have access to more data than ever before.
+              {t.home.problem.p2a}
               <br className="hidden sm:block" />
-              But access to data is not the same as understanding people.
+              {t.home.problem.p2b}
             </p>
             <p className="text-[var(--brand-ink)] font-medium">
-              And without that understanding, your decisions become assumptions.
+              {t.home.problem.p3}
             </p>
           </div>
         </div>
@@ -145,30 +124,30 @@ export default function Home() {
           <div>
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-8">
-              Your business cannot exist without <span className="text-[var(--brand-blue)]">clients</span>
+              {t.home.why.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.home.why.title_blue}</span>
             </h2>
             <div className="space-y-5 text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)]">
-              <p>Your business moves forward when people see value in what you offer.</p>
+              <p>{t.home.why.p1}</p>
               <p className="text-[var(--brand-muted)]">
-                Not when your idea is good.<br />
-                Not when your product is complete.<br />
-                But when a real person recognizes a need and decides to act.
+                {t.home.why.p2a}<br />
+                {t.home.why.p2b}<br />
+                {t.home.why.p2c}
               </p>
               <p className="text-[var(--brand-ink)] font-medium">
-                Understanding that person is not optional.
-                It is central to everything that follows.
+                {t.home.why.p3a} {t.home.why.p3b}
               </p>
             </div>
           </div>
           <div className="relative order-first md:order-last">
             <img
               src="/assets/images/stock-crosswalk.jpg"
-              alt="People in motion — real decisions, real clients"
+              alt=""
               className="w-full aspect-[4/5] object-cover rounded-sm"
             />
             <div className="absolute -bottom-5 -right-3 sm:-bottom-6 sm:-right-6 bg-[var(--brand-blue)] text-white p-5 sm:p-6 rounded-sm max-w-[240px]">
               <p className="font-display uppercase text-base sm:text-lg leading-tight">
-                Real people. Real decisions. Your real business.
+                {t.home.why.imgCaption}
               </p>
             </div>
           </div>
@@ -183,14 +162,15 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl lg:text-6xl leading-[0.95] mb-6">
-            A different <span className="text-[var(--brand-blue)]">starting point</span>
+            {t.home.explore.title1}{" "}
+            <span className="text-[var(--brand-blue)]">{t.home.explore.title_blue}</span>
           </h2>
           <p className="text-base sm:text-lg text-white/75 max-w-xl leading-relaxed mb-12 md:mb-14">
-            Step back and rethink how you define your clients. You will explore:
+            {t.home.explore.subtitle}
           </p>
 
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            {EXPLORE.map((t, i) => (
+            {t.home.explore.items.map((item, i) => (
               <li
                 key={i}
                 data-testid={`explore-item-${i}`}
@@ -200,7 +180,7 @@ export default function Home() {
                   <span className="font-display text-2xl text-[var(--brand-blue)] shrink-0">
                     0{i + 1}
                   </span>
-                  <p className="text-[16px] sm:text-[17px] leading-relaxed text-white/90">{t}</p>
+                  <p className="text-[16px] sm:text-[17px] leading-relaxed text-white/90">{item}</p>
                 </div>
               </li>
             ))}
@@ -217,13 +197,11 @@ export default function Home() {
           <div className="md:col-span-7">
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-6">
-              Start with the first <span className="text-[var(--brand-blue)]">3 chapters</span>
+              {t.home.sample.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.home.sample.title_blue}</span>
             </h2>
             <p className="text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)] mb-8 max-w-lg">
-              If you are not fully clear on who your clients are, this is a
-              practical place to begin. Download the first chapters and start
-              reflecting on how you define and understand the people you are
-              trying to serve.
+              {t.home.sample.body}
             </p>
             <button
               type="button"
@@ -231,7 +209,7 @@ export default function Home() {
               data-testid="section-get-chapters-btn"
               className="btn-primary inline-flex items-center gap-2 h-14 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
             >
-              <Download size={16} /> Get the first 3 chapters
+              <Download size={16} /> {t.cta.getChapters}
             </button>
           </div>
           <div className="md:col-span-5 flex justify-center md:justify-end">
@@ -248,7 +226,7 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-12 md:mb-14 max-w-3xl">
-            {t.testimonials.title} <span className="text-[var(--brand-blue)]">{t.testimonials.titleBlue}</span>
+            {t.home.testimonialsTitle} <span className="text-[var(--brand-blue)]">{t.home.testimonialsTitleBlue}</span>
           </h2>
           <TestimonialsGrid testPrefix="testimonial" />
         </div>
@@ -269,7 +247,7 @@ export default function Home() {
               />
               <div className="absolute -bottom-4 -left-4 bg-[var(--brand-dark)] text-white px-5 py-3 rounded-sm">
                 <p className="font-display uppercase text-sm tracking-wider">
-                  The author
+                  {t.home.aboutShort.badge}
                 </p>
               </div>
             </div>
@@ -277,19 +255,15 @@ export default function Home() {
           <div className="md:col-span-7">
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-6">
-              About the author
+              {t.home.aboutShort.title}
             </h2>
             <div className="space-y-5 text-[16px] sm:text-[17px] leading-[1.75] text-[var(--brand-dark)]">
               <p>
-                <strong className="text-[var(--brand-ink)]">Antoine B. Carrière</strong>{" "}
-                is an entrepreneur, coach, and facilitator who has spent over two
-                decades helping individuals move forward with greater clarity in
-                their work and decisions.
+                <strong className="text-[var(--brand-ink)]">{t.home.aboutShort.p1a}</strong>
+                {t.home.aboutShort.p1b}
               </p>
               <p>
-                His work focuses on helping people better understand themselves,
-                the people they serve, and the choices they make in building
-                their careers and businesses.
+                {t.home.aboutShort.p2}
               </p>
             </div>
             <Link
@@ -297,7 +271,7 @@ export default function Home() {
               data-testid="home-learn-more-link"
               className="mt-8 inline-flex items-center gap-2 text-[var(--brand-blue)] font-semibold uppercase tracking-wider text-xs link-underline"
             >
-              Learn more <ArrowRight size={14} />
+              {t.cta.learnMore} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -312,20 +286,20 @@ export default function Home() {
           <div className="max-w-2xl mb-12 md:mb-14">
             <span className="rule-accent mb-5 block" />
             <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-5">
-              Go further with practical <span className="text-[var(--brand-blue)]">resources</span>
+              {t.home.resourcesPreview.title1}{" "}
+              <span className="text-[var(--brand-blue)]">{t.home.resourcesPreview.title_blue}</span>
             </h2>
             <p className="text-[var(--brand-muted)] text-base md:text-lg leading-relaxed">
-              The book is supported by tools, articles, and reflection material
-              designed to help you apply the ideas to your own situation.
+              {t.home.resourcesPreview.subtitle}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {RESOURCE_CARDS.map((c, i) => (
+            {RESOURCE_CARDS.map((c) => (
               <Link
-                key={i}
+                key={c.key}
                 to={c.to}
-                data-testid={`resource-preview-${c.title.toLowerCase()}`}
+                data-testid={`resource-preview-${c.key}`}
                 className="group bg-white border border-[var(--brand-border)] rounded-md p-7 sm:p-8 transition-all duration-300 hover:border-[var(--brand-blue)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-20px_rgba(0,173,255,0.25)] flex flex-col"
               >
                 <div className="w-12 h-12 rounded-sm bg-[var(--brand-dark)] text-white grid place-items-center mb-6 group-hover:bg-[var(--brand-blue)] transition-colors">
@@ -350,7 +324,7 @@ export default function Home() {
               data-testid="explore-resources-link"
               className="btn-ghost-dark inline-flex items-center justify-center h-12 px-7 rounded-full text-sm font-semibold uppercase tracking-wider"
             >
-              Explore resources <ArrowRight size={14} className="ml-2" />
+              {t.cta.exploreResources} <ArrowRight size={14} className="ml-2" />
             </Link>
           </div>
         </div>

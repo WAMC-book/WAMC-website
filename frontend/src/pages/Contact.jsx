@@ -13,47 +13,27 @@ export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { lang } = useLang();
+  const { lang, t } = useLang();
 
-  const copy = lang === "fr"
-    ? {
-        title: "Contact",
-        subtitle: "Un court message suffit. Écrivez-nous pour toute question ou simplement pour nous faire signe.",
-        local: "Local",
-        toll: "Sans frais",
-        email: "Courriel",
-        name: "Votre nom",
-        emailLabel: "Courriel",
-        message: "Message",
-        placeholderName: "Jeanne Tremblay",
-        placeholderMsg: "Qu'avez-vous en tête?",
-        send: "Envoyer le message",
-        sending: "Envoi…",
-        success: "Merci pour votre message.",
-        successBody: "Votre message a bien été reçu.",
-        another: "Écrire à nouveau",
-        validation: "Merci de remplir tous les champs.",
-        errorToast: "Une erreur est survenue. Réessayez.",
-      }
-    : {
-        title: "Contact",
-        subtitle: "A short note is enough. Say hello, ask a question, or share what the book brought up for you.",
-        local: "Local",
-        toll: "Toll-free",
-        email: "Email",
-        name: "Your name",
-        emailLabel: "Email",
-        message: "Message",
-        placeholderName: "Jane Doe",
-        placeholderMsg: "What's on your mind?",
-        send: "Send message",
-        sending: "Sending…",
-        success: "Thank you for writing.",
-        successBody: "Your message was received.",
-        another: "Send another",
-        validation: "Please fill in all fields.",
-        errorToast: "Something went wrong. Please try again.",
-      };
+  const copy = {
+    title: t.contact.title,
+    subtitle: t.contact.subtitle,
+    local: t.contact.local,
+    toll: t.contact.toll,
+    email: t.contact.email,
+    name: t.contact.name,
+    emailLabel: t.contact.emailLabel,
+    message: t.contact.message,
+    placeholderName: t.contact.placeholderName,
+    placeholderMsg: t.contact.placeholderMsg,
+    send: t.contact.send,
+    sending: t.contact.sending,
+    success: t.contact.success,
+    successBody: t.contact.successBody,
+    another: t.contact.another,
+    validation: t.contact.validation,
+    errorToast: t.contact.errorToast,
+  };
 
   const update = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 

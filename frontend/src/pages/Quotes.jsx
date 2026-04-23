@@ -247,10 +247,7 @@ export default function Quotes() {
         </div>
       </section>
 
-      <CTASection
-        title="Every quote came from this book."
-        subtitle="Read the whole thing — start with the first 3 chapters."
-      />
+      <CTASection />
     </div>
   );
 }

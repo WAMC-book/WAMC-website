@@ -1,36 +1,40 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Wrench, FileText, Quote } from "lucide-react";
 import CTASection from "@/components/CTASection";
-
-const SECTIONS = [
-  {
-    icon: Wrench,
-    title: "Tools",
-    body: "Practical frameworks to define and understand your clients. Built to be used, not just read.",
-    to: "/tools",
-    cta: "Access tools",
-    testid: "resources-tools",
-  },
-  {
-    icon: FileText,
-    title: "Articles",
-    body: "Short reflections on the ideas that shape the book — written to be useful in a single sitting.",
-    to: "#",
-    cta: "Read articles",
-    testid: "resources-articles",
-    placeholder: true,
-  },
-  {
-    icon: Quote,
-    title: "Quotes",
-    body: "Lines from the book to carry into your week, share with a co-founder, or sit with on your own.",
-    to: "/quotes",
-    cta: "View quotes",
-    testid: "resources-quotes",
-  },
-];
+import { useLang } from "@/lib/LanguageContext";
 
 export default function Resources() {
+  const { t } = useLang();
+
+  const SECTIONS = [
+    {
+      icon: Wrench,
+      title: t.resources.tools.title,
+      body: t.resources.tools.body,
+      to: "/tools",
+      cta: t.resources.tools.cta,
+      testid: "resources-tools",
+    },
+    {
+      icon: FileText,
+      title: t.resources.articles.title,
+      body: t.resources.articles.body,
+      to: "#",
+      cta: t.resources.articles.cta,
+      testid: "resources-articles",
+      placeholder: true,
+      placeholderLabel: t.resources.articles.comingSoon,
+    },
+    {
+      icon: Quote,
+      title: t.resources.quotes.title,
+      body: t.resources.quotes.body,
+      to: "/quotes",
+      cta: t.resources.quotes.cta,
+      testid: "resources-quotes",
+    },
+  ];
+
   return (
     <div data-testid="resources-page">
       {/* HEADER */}
@@ -41,10 +45,10 @@ export default function Resources() {
             data-testid="resources-headline"
             className="font-display uppercase text-5xl md:text-6xl lg:text-7xl leading-[0.92] text-[var(--brand-ink)] max-w-4xl"
           >
-            Resources
+            {t.resources.title}
           </h1>
           <p className="text-lg md:text-xl text-[var(--brand-dark)] mt-6 max-w-2xl leading-relaxed">
-            Tools and material to help you better define and understand your clients.
+            {t.resources.subtitle}
           </p>
         </div>
       </section>
@@ -53,8 +57,7 @@ export default function Resources() {
       <section className="pb-10">
         <div className="max-w-[900px] mx-auto px-6 lg:px-10">
           <p className="text-[17px] leading-[1.75] text-[var(--brand-muted)] border-l-2 border-[var(--brand-blue)] pl-6">
-            Everything here is an extension of the book. Choose what is useful
-            to you right now, and leave the rest for later.
+            {t.resources.intro}
           </p>
         </div>
       </section>
@@ -91,7 +94,7 @@ export default function Resources() {
                     </span>
                     {s.placeholder && (
                       <span className="text-[10px] uppercase tracking-widest text-[var(--brand-muted)]">
-                        Coming soon
+                        {s.placeholderLabel}
                       </span>
                     )}
                   </div>
@@ -110,8 +113,8 @@ export default function Resources() {
       </section>
 
       <CTASection
-        title="The best resource is still the book."
-        subtitle="Everything here is built to be used alongside it."
+        title={t.resources.ctaTitle}
+        subtitle={t.resources.ctaSubtitle}
       />
     </div>
   );
