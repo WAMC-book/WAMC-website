@@ -1,7 +1,6 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import bcrypt
@@ -9,17 +8,17 @@ import jwt
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
-import uuid
 from datetime import datetime, timezone, timedelta
+
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database import engine, get_db
+from models import Lead as LeadORM, ContactMessage as ContactORM
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 # Auth config
 JWT_SECRET = os.environ.get('JWT_SECRET', 'dev-secret')
@@ -33,8 +32,8 @@ app = FastAPI(title="Who Are My Clients API")
 api_router = APIRouter(prefix="/api")
 
 
-def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def now_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
@@ -75,7 +74,7 @@ async def require_admin(request: Request) -> dict:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-# ---------- Models ----------
+# ---------- Pydantic Schemas ----------
 
 class LeadCreate(BaseModel):
     first_name: str = Field(min_length=1, max_length=80)
@@ -86,8 +85,8 @@ class LeadCreate(BaseModel):
     locale: Optional[str] = "en"
 
 
-class Lead(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+class LeadOut(BaseModel):
+    model_config = ConfigDict(extra="ignore", from_attributes=True)
     id: str
     first_name: str
     last_name: str
@@ -105,8 +104,8 @@ class ContactCreate(BaseModel):
     locale: Optional[str] = "en"
 
 
-class ContactMessage(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+class ContactOut(BaseModel):
+    model_config = ConfigDict(extra="ignore", from_attributes=True)
     id: str
     name: str
     email: str
@@ -130,6 +129,30 @@ class Resource(BaseModel):
     type: str
 
 
+def lead_to_out(row: LeadORM) -> LeadOut:
+    return LeadOut(
+        id=row.id,
+        first_name=row.first_name,
+        last_name=row.last_name,
+        email=row.email,
+        role=row.role,
+        source=row.source,
+        locale=row.locale,
+        created_at=row.created_at.isoformat() if row.created_at else "",
+    )
+
+
+def contact_to_out(row: ContactORM) -> ContactOut:
+    return ContactOut(
+        id=row.id,
+        name=row.name,
+        email=row.email,
+        message=row.message,
+        locale=row.locale,
+        created_at=row.created_at.isoformat() if row.created_at else "",
+    )
+
+
 SEED_RESOURCES: List[dict] = [
     {"id": "r-001", "title": "The Client Clarity Worksheet", "description": "A printable worksheet to map out who you actually serve — and who you don't.", "category": "Worksheet", "link": "#", "image": "/assets/images/stock-crosswalk.jpg", "type": "worksheet"},
     {"id": "r-002", "title": "10 Questions Before You Launch", "description": "A short reflection guide for early-stage founders who haven't sold yet.", "category": "Guide", "link": "#", "image": "/assets/images/stock-street.jpg", "type": "download"},
@@ -147,34 +170,36 @@ async def root():
     return {"message": "Who Are My Clients API", "status": "ok"}
 
 
-@api_router.post("/leads", response_model=Lead)
-async def create_lead(payload: LeadCreate):
-    doc = {
-        "id": str(uuid.uuid4()),
-        "first_name": payload.first_name.strip(),
-        "last_name": payload.last_name.strip(),
-        "email": payload.email.lower().strip(),
-        "role": payload.role.strip(),
-        "source": payload.source or "chapter_download",
-        "locale": (payload.locale or "en").lower(),
-        "created_at": now_iso(),
-    }
-    await db.leads.insert_one(doc.copy())
-    return Lead(**doc)
+@api_router.post("/leads", response_model=LeadOut)
+async def create_lead(payload: LeadCreate, db: AsyncSession = Depends(get_db)):
+    row = LeadORM(
+        first_name=payload.first_name.strip(),
+        last_name=payload.last_name.strip(),
+        email=payload.email.lower().strip(),
+        role=payload.role.strip(),
+        source=(payload.source or "chapter_download"),
+        locale=(payload.locale or "en").lower(),
+        created_at=now_utc(),
+    )
+    db.add(row)
+    await db.commit()
+    await db.refresh(row)
+    return lead_to_out(row)
 
 
-@api_router.post("/contact", response_model=ContactMessage)
-async def create_contact(payload: ContactCreate):
-    doc = {
-        "id": str(uuid.uuid4()),
-        "name": payload.name.strip(),
-        "email": payload.email.lower().strip(),
-        "message": payload.message.strip(),
-        "locale": (payload.locale or "en").lower(),
-        "created_at": now_iso(),
-    }
-    await db.contact_messages.insert_one(doc.copy())
-    return ContactMessage(**doc)
+@api_router.post("/contact", response_model=ContactOut)
+async def create_contact(payload: ContactCreate, db: AsyncSession = Depends(get_db)):
+    row = ContactORM(
+        name=payload.name.strip(),
+        email=payload.email.lower().strip(),
+        message=payload.message.strip(),
+        locale=(payload.locale or "en").lower(),
+        created_at=now_utc(),
+    )
+    db.add(row)
+    await db.commit()
+    await db.refresh(row)
+    return contact_to_out(row)
 
 
 @api_router.get("/resources", response_model=List[Resource])
@@ -215,25 +240,24 @@ async def admin_me(_: dict = Depends(require_admin)):
     return {"ok": True, "role": "admin"}
 
 
-@api_router.get("/admin/leads", response_model=List[Lead])
-async def admin_list_leads(_: dict = Depends(require_admin)):
-    items = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
-    return [Lead(**i) for i in items]
+@api_router.get("/admin/leads", response_model=List[LeadOut])
+async def admin_list_leads(_: dict = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(LeadORM).order_by(LeadORM.created_at.desc()).limit(5000))
+    return [lead_to_out(r) for r in result.scalars().all()]
 
 
-@api_router.get("/admin/contacts", response_model=List[ContactMessage])
-async def admin_list_contacts(_: dict = Depends(require_admin)):
-    items = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
-    return [ContactMessage(**i) for i in items]
+@api_router.get("/admin/contacts", response_model=List[ContactOut])
+async def admin_list_contacts(_: dict = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(ContactORM).order_by(ContactORM.created_at.desc()).limit(5000))
+    return [contact_to_out(r) for r in result.scalars().all()]
 
 
 @api_router.get("/admin/stats")
-async def admin_stats(_: dict = Depends(require_admin)):
-    leads_count = await db.leads.count_documents({})
-    contacts_count = await db.contact_messages.count_documents({})
-    # breakdown by locale
-    en_leads = await db.leads.count_documents({"locale": "en"})
-    fr_leads = await db.leads.count_documents({"locale": "fr"})
+async def admin_stats(_: dict = Depends(require_admin), db: AsyncSession = Depends(get_db)):
+    leads_count = (await db.execute(select(func.count()).select_from(LeadORM))).scalar_one()
+    contacts_count = (await db.execute(select(func.count()).select_from(ContactORM))).scalar_one()
+    en_leads = (await db.execute(select(func.count()).select_from(LeadORM).where(LeadORM.locale == "en"))).scalar_one()
+    fr_leads = (await db.execute(select(func.count()).select_from(LeadORM).where(LeadORM.locale == "fr"))).scalar_one()
     return {
         "leads_total": leads_count,
         "contacts_total": contacts_count,
@@ -257,5 +281,5 @@ logger = logging.getLogger(__name__)
 
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+async def shutdown_db():
+    await engine.dispose()

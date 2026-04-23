@@ -1,0 +1,50 @@
+{
+  "summary": "Post-Supabase-migration validation. Backend: 24/24 pytest tests PASS — public POST /api/leads and /api/contact successfully create rows in Supabase Postgres, GET /api/admin/{leads,contacts,stats} return data, JWT auth (cookie + bearer) works, wrong password→401, missing/invalid token→401, validation 422s intact, /api/resources returns exactly 6 seed items and filters correctly. Admin login UI works end-to-end (correct pw→redirects /admin, wrong pw→stays /login) and /admin dashboard pulls counts from Supabase (shows CHAPTER DOWNLOADS/CONTACT MESSAGES with en/fr breakdown). CRITICAL FRONTEND BUG: Tools.jsx imports `TOOLS` from @/lib/constants but only `TOOLS_EN` and `TOOLS_FR` are exported — causes webpack compile error on EVERY page, displaying a full-screen red 'Compiled with problems' overlay that blocks user interaction with Home/Book/Contact/Tools/Quotes. Data layer itself is healthy; the bug is a React import mismatch introduced alongside FR i18n additions. Also noticed stale text `MongoDB · Motor` in Admin dashboard footer — should read Supabase.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/leads, /api/contact", "issue": "Still returns 200 instead of REST-standard 201 (carry-over from iteration_1, not a regression)"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Tools.jsx (and transitively every page due to webpack overlay)", "issue": "Imports `TOOLS` from @/lib/constants but only `TOOLS_EN` and `TOOLS_FR` are exported. Webpack compiles with errors and injects a full-screen error overlay on every route, blocking all clicks (including 'hero-get-chapters-btn', 'chapter-submit-btn', Contact Send Message). Must either (a) import locale-specific list via useLocale() / i18n hook, or (b) re-export `TOOLS` as `TOOLS_EN` alias.", "selector": "src/pages/Tools.jsx:1, :27", "priority": "CRITICAL"},
+      {"component": "Admin dashboard footer", "issue": "VERSION card still displays 'MongoDB · Motor' after migration to Supabase/SQLAlchemy. Update the label (likely in Admin.jsx) to reflect the current stack.", "selector": "/admin VERSION card", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "ChapterDownloadModal end-to-end (UI → POST /api/leads → Supabase)", "issue": "Could NOT be fully UI-verified because the webpack error overlay intercepts button clicks. The underlying POST /api/leads endpoint is verified healthy via backend tests (row persisted and visible via /api/admin/leads). Re-test after Tools.jsx fix.", "affected_selectors": ["[data-testid='hero-get-chapters-btn']", "[data-testid='chapter-submit-btn']"]},
+      {"flow": "Contact form submit (UI)", "issue": "Same as above — blocked by compile overlay. Backend endpoint confirmed working.", "affected_selectors": ["[data-testid='contact-submit-btn']"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "HIGH: Fix /app/frontend/src/pages/Tools.jsx — change `import { TOOLS }` to use TOOLS_EN/TOOLS_FR with a locale selector (same pattern used for ROLE_OPTIONS_EN/FR and BOOK/BOOK_FR). This is blocking the entire frontend preview with a webpack overlay.",
+    "MEDIUM: Update Admin.jsx VERSION card label from 'MongoDB · Motor' to reflect Supabase Postgres / SQLAlchemy.",
+    "LOW: Consider returning 201 on POST /api/leads and /api/contact for REST correctness."
+  ],
+  "critical_code_review_comments": [
+    "Supabase migration itself is clean: database.py correctly converts postgresql:// to postgresql+asyncpg://, pool sizing is reasonable for Transaction Pooler (statement_cache_size=0 required for pgbouncer — ✅ set), sessions are closed in get_db finally block.",
+    "models.py generates UUID4 strings as primary keys — matches Mongo-era id style so no Pydantic schema changes needed. Good migration ergonomics.",
+    "server.py uses Depends(get_db) correctly and awaits commit/refresh properly. LeadOut/ContactOut use ConfigDict(from_attributes=True) — clean ORM → pydantic mapping.",
+    "Admin endpoints all gated by require_admin dependency — token checked from cookie first then Authorization Bearer, both verified via tests.",
+    "No Mongo ObjectId leakage possible — the ORM models use String(36) UUIDs as id, so `_id` is not a concern post-migration.",
+    "BUG: Tools.jsx imports TOOLS which does not exist — constants.js only exports TOOLS_EN and TOOLS_FR. Compile breaks the entire frontend dev overlay. Confirm via `grep -n 'export const TOOLS' /app/frontend/src/lib/constants.js` (no match).",
+    "Minor: CORS_ORIGINS=* is fine for preview but should be tightened before production.",
+    "Minor: JWT_SECRET fallback to 'dev-secret' in server.py — safe because env var is set, but consider failing fast if missing."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (rewritten to cover admin auth + Supabase persistence verification + cleanup)",
+    "/app/test_reports/pytest/pytest_results.xml (regenerated, 24/24 passed)"
+  ],
+  "success_rate": {"backend": "100% (24/24 pytest)", "frontend": "Admin-auth flow ✅; Home/Book/Contact/Tools/Quotes blocked by compile overlay"},
+  "test_credentials": "Admin password: WhoAreMyClients2026! (from /app/memory/test_credentials.md) — verified working",
+  "seed_data_creation": "Created ~4 TEST_ leads and 1 TEST_ contact via backend API during tests; all deleted in TestZCleanup fixture (WHERE email LIKE 'test_%@example.com'). Supabase is clean post-run — admin stats should return leads_total=0 after cleanup.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "After Tools.jsx fix lands, re-verify: (1) no webpack overlay on any route, (2) Tools page renders 8 tool cards with data-testid='tool-<id>' for each locale, (3) ChapterDownloadModal opens from hero-get-chapters-btn, submits a lead, shows success state, (4) Contact form submits and shows success, (5) Admin dashboard VERSION card updated. Backend tests in /app/backend/tests/backend_test.py can be reused as-is (they self-clean TEST rows).",
+  "rca of the issue": "Tools.jsx compile error — root cause: during the FR/i18n constants refactor, TOOLS was split into TOOLS_EN and TOOLS_FR in /app/frontend/src/lib/constants.js but /app/frontend/src/pages/Tools.jsx was not updated (still does `import { TOOLS }`). Webpack surfaces this as a compile error and injects a full-viewport red overlay on every page served by the dev server, intercepting pointer events on any CTA. Fix: mirror the locale pattern used in Book.jsx / Login.jsx — import both TOOLS_EN and TOOLS_FR and pick via the current locale hook (e.g., `const TOOLS = locale === 'fr' ? TOOLS_FR : TOOLS_EN;`)."
+}
