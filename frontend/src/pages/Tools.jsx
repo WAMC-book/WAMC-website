@@ -1,7 +1,10 @@
-import { TOOLS } from "@/lib/constants";
+import { TOOLS_EN, TOOLS_FR } from "@/lib/constants";
+import { useLang } from "@/lib/LanguageContext";
 import CTASection from "@/components/CTASection";
 
 export default function Tools() {
+  const { lang } = useLang();
+  const TOOLS = lang === "fr" ? TOOLS_FR : TOOLS_EN;
   return (
     <div data-testid="tools-page">
       {/* HEADER */}

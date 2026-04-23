@@ -165,7 +165,7 @@ export default function Admin() {
           <div className="border border-[var(--brand-border)] rounded-md p-6 bg-[var(--brand-dark)] text-white">
             <div className="text-xs uppercase tracking-widest text-white/60">Version</div>
             <div className="font-display text-xl mt-2">1.0 · Feb 2026</div>
-            <div className="text-xs text-white/60 mt-2">MongoDB · Motor</div>
+            <div className="text-xs text-white/60 mt-2">Supabase · SQLAlchemy</div>
           </div>
         </div>
 

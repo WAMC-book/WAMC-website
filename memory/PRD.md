@@ -43,6 +43,16 @@ User will deploy to GitHub + Vercel (frontend) + Supabase (DB) later.
 - Testimonials (3 placeholder quotes — user to replace with real ones).
 - All interactive elements have `data-testid` attributes.
 
+## What's been implemented (2026-04 — Supabase migration, iteration 2, 24/24 backend tests passing)
+- Migrated data layer from MongoDB (motor) → Supabase Postgres (SQLAlchemy async + asyncpg).
+- Added `/app/backend/database.py` (async engine w/ `statement_cache_size=0` for transaction pooler), `/app/backend/models.py` (Lead, ContactMessage ORM).
+- Alembic initialized at `/app/backend/alembic/` with initial migration (tables + indexes on email/created_at/locale) applied to Supabase.
+- `DATABASE_URL` set in `/app/backend/.env` (Transaction Pooler URI, port 6543).
+- `server.py` rewritten to use SQLAlchemy async sessions via `Depends(get_db)`. Public + admin endpoints fully functional against Supabase.
+- Verified end-to-end: lead create, contact create, admin login (cookie + bearer), admin leads/contacts list, admin stats (locale breakdown).
+- Fixed `Tools.jsx` compile error (was importing missing `TOOLS` constant after FR i18n refactor — now uses `TOOLS_EN`/`TOOLS_FR` with `useLang()`).
+- Updated Admin dashboard VERSION card label from "MongoDB · Motor" → "Supabase · SQLAlchemy".
+
 ## Placeholders the user must provide
 - **AMAZON_BOOK_URL** in `/app/frontend/src/lib/constants.js` (currently `https://www.amazon.com/dp/PLACEHOLDER_ASIN`).
 - **First-3-chapters PDF** → upload to `/app/frontend/public/assets/who-are-my-clients-first-3-chapters.pdf` *or* update `CHAPTERS_PDF_URL` in constants to a hosted URL.
@@ -54,10 +64,11 @@ User will deploy to GitHub + Vercel (frontend) + Supabase (DB) later.
 - Swap Amazon URL + PDF + contact details + real testimonials.
 
 ### P1 (next phase)
-- Supabase migration: swap Motor DB calls for Supabase client; create `leads`, `contact_messages` tables.
+- Wire the full French translation copy into `i18n.js` across all pages (infra exists, copy is pending — user provided it in a previous session but it still needs to be mapped). [PAUSED at user request — tackle after current priorities]
 - Email automation: send lead the PDF via Resend/SendGrid instead of direct browser download.
-- Admin view: small page to export leads as CSV.
+- Admin view: add CSV export of leads.
 - Real article + quote content for Resources page (currently "Coming soon").
+- Return 201 Created on POST /api/leads and /api/contact for REST correctness (minor).
 
 ### P2 (nice-to-have)
 - Newsletter opt-in.
