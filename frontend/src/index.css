@@ -12,8 +12,18 @@
     --brand-muted: #7f7d80;
     --brand-ink: #1f2326;
     --brand-bg: #ffffff;
-    --brand-bg-soft: #f7f7f5;
-    --brand-border: #e7e5e1;
+    --brand-bg-alt: #ffffff;        /* all sections on pure white */
+    --brand-border: #ebeae6;
+    --brand-border-strong: #d9d7d2;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    background: #ffffff;
+    overflow-x: hidden;
 }
 
 body {
@@ -21,9 +31,9 @@ body {
     font-family: 'Libre Franklin', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: 400;
     color: var(--brand-ink);
-    background: var(--brand-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .font-display {
@@ -40,7 +50,6 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* Custom selection */
 ::selection {
     background: var(--brand-blue);
     color: white;
@@ -68,7 +77,7 @@ code {
     transform: scaleX(1);
 }
 
-/* Primary button hover */
+/* Primary button */
 .btn-primary {
     background: var(--brand-blue);
     color: #fff;
@@ -91,12 +100,6 @@ code {
     color: white;
 }
 
-/* Book cover floating effect */
-.book-shadow {
-    filter: drop-shadow(0 30px 40px rgba(69, 73, 76, 0.28))
-            drop-shadow(0 10px 15px rgba(69, 73, 76, 0.12));
-}
-
 /* Thin rule accent */
 .rule-accent {
     display: inline-block;
@@ -105,20 +108,17 @@ code {
     background: var(--brand-blue);
 }
 
+/* Subtle section divider */
+.section-divider {
+    border-top: 1px solid var(--brand-border);
+}
+
 /* Fade-up entrance */
 @keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-.fade-up {
-    animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
+.fade-up { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .fade-up-1 { animation-delay: 0.05s; }
 .fade-up-2 { animation-delay: 0.15s; }
 .fade-up-3 { animation-delay: 0.25s; }
@@ -135,28 +135,24 @@ code {
         --popover-foreground: 210 6% 15%;
         --primary: 199 100% 50%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 40 9% 96%;
+        --secondary: 0 0% 100%;
         --secondary-foreground: 210 6% 24%;
-        --muted: 40 9% 96%;
+        --muted: 0 0% 100%;
         --muted-foreground: 220 2% 50%;
         --accent: 199 100% 50%;
         --accent-foreground: 0 0% 100%;
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
-        --border: 40 14% 90%;
-        --input: 40 14% 90%;
+        --border: 40 14% 92%;
+        --input: 40 14% 92%;
         --ring: 199 100% 50%;
         --radius: 0.5rem;
     }
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+    * { @apply border-border; }
+    body { @apply bg-background text-foreground; }
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Archivo Narrow', sans-serif;
         letter-spacing: -0.01em;
@@ -164,32 +160,18 @@ code {
 }
 
 @layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
-    }
+    [data-debug-wrapper="true"] { display: contents !important; }
     [data-debug-wrapper="true"] > * {
-        margin-left: inherit;
-        margin-right: inherit;
-        margin-top: inherit;
-        margin-bottom: inherit;
-        padding-left: inherit;
-        padding-right: inherit;
-        padding-top: inherit;
-        padding-bottom: inherit;
-        column-gap: inherit;
-        row-gap: inherit;
-        gap: inherit;
-        border-left-width: inherit;
-        border-right-width: inherit;
-        border-top-width: inherit;
-        border-bottom-width: inherit;
-        border-left-style: inherit;
-        border-right-style: inherit;
-        border-top-style: inherit;
-        border-bottom-style: inherit;
-        border-left-color: inherit;
-        border-right-color: inherit;
-        border-top-color: inherit;
-        border-bottom-color: inherit;
+        margin-left: inherit; margin-right: inherit; margin-top: inherit; margin-bottom: inherit;
+        padding-left: inherit; padding-right: inherit; padding-top: inherit; padding-bottom: inherit;
+        column-gap: inherit; row-gap: inherit; gap: inherit;
+        border-left-width: inherit; border-right-width: inherit; border-top-width: inherit; border-bottom-width: inherit;
+        border-left-style: inherit; border-right-style: inherit; border-top-style: inherit; border-bottom-style: inherit;
+        border-left-color: inherit; border-right-color: inherit; border-top-color: inherit; border-bottom-color: inherit;
     }
+}
+
+/* Phones */
+@media (max-width: 640px) {
+    .hero-title { font-size: clamp(36px, 11vw, 58px) !important; line-height: 0.95 !important; }
 }

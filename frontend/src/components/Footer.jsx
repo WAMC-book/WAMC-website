@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
-import { AMAZON_BOOK_URL } from "@/lib/constants";
+import useAmazonUrl from "@/lib/useAmazonUrl";
 
 export default function Footer() {
+  const { primary: amazonUrl, alt: amazonAlt, altLabel } = useAmazonUrl();
+
   return (
     <footer
       data-testid="site-footer"
-      className="border-t border-[var(--brand-border)] bg-[var(--brand-bg-soft)]"
+      className="border-t border-[var(--brand-border)] bg-white"
     >
       <div className="max-w-[1280px] mx-auto px-6 lg:px-10 py-16 grid grid-cols-1 md:grid-cols-12 gap-10">
         <div className="md:col-span-5">
@@ -22,8 +24,8 @@ export default function Footer() {
             </span>
           </Link>
           <p className="text-[var(--brand-muted)] text-sm max-w-md leading-relaxed">
-            A practical book for entrepreneurs who want to understand — honestly —
-            who they are building for.
+            A practical starting point for entrepreneurs who want to understand —
+            honestly — who they are building for.
           </p>
         </div>
 
@@ -54,20 +56,29 @@ export default function Footer() {
 
         <div className="md:col-span-4">
           <h4 className="font-display uppercase text-sm tracking-widest text-[var(--brand-dark)] mb-4">
-            Start Here
+            Start here
           </h4>
           <p className="text-sm text-[var(--brand-muted)] leading-relaxed mb-4">
             The fastest way to find out if this book is for you is to read
             the first three chapters.
           </p>
           <a
-            href={AMAZON_BOOK_URL}
+            href={amazonUrl}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="footer-buy-book-btn"
             className="btn-primary inline-flex items-center px-5 h-11 rounded-full text-sm font-semibold uppercase tracking-wider"
           >
             Buy the book
+          </a>
+          <a
+            href={amazonAlt}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="footer-buy-book-alt"
+            className="block mt-3 text-xs uppercase tracking-widest text-[var(--brand-muted)] hover:text-[var(--brand-blue)] transition-colors"
+          >
+            Also on {altLabel} →
           </a>
         </div>
       </div>
@@ -78,7 +89,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Who Are My Clients. All rights reserved.
           </p>
           <p className="text-xs text-[var(--brand-muted)]">
-            Made with care · Book-first platform
+            By {"\u00A0"}Antoine B. Carrière
           </p>
         </div>
       </div>

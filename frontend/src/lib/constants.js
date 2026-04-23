@@ -1,7 +1,13 @@
-// Replace with actual Amazon link when available
-export const AMAZON_BOOK_URL = "https://www.amazon.com/dp/PLACEHOLDER_ASIN";
+// Amazon links (real)
+export const AMAZON_URLS = {
+  us: "https://www.amazon.com/Who-Are-My-Clients-them/dp/0995255520",
+  ca: "https://www.amazon.ca/Who-Are-My-Clients-them/dp/0995255520",
+};
 
-// Replace with actual hosted PDF URL (e.g., Supabase storage / S3)
+// Kept for backward-compat imports
+export const AMAZON_BOOK_URL = AMAZON_URLS.us;
+
+// Hosted first-3-chapters PDF (in /public/assets/)
 export const CHAPTERS_PDF_URL = "/assets/who-are-my-clients-first-3-chapters.pdf";
 
 // Book metadata
@@ -43,37 +49,37 @@ export const TOOLS = [
     id: "client-profile",
     name: "Client profile",
     description:
-      "A structured way to describe the person behind the buying decision.",
+      "A structured way to describe the person behind your buying decision.",
   },
   {
     id: "client-definition-framework",
     name: "Client definition framework",
     description:
-      "A framework to move from a vague audience to a clear client definition.",
+      "A framework to move from a vague audience to a clear definition of your client.",
   },
   {
     id: "level-of-client-definition",
     name: "Level of client definition",
     description:
-      "A way to evaluate how clearly your current client is defined.",
+      "A way to evaluate how clearly you have defined your client today.",
   },
   {
     id: "buying-process-stages",
     name: "Buying process stages",
     description:
-      "The steps clients move through before choosing to work with you.",
+      "The steps your client moves through before choosing to work with you.",
   },
   {
     id: "internal-factors",
     name: "Internal factors",
     description:
-      "The personal, inner forces that shape how a client decides.",
+      "The personal, inner forces that shape how your client decides.",
   },
   {
     id: "external-factors",
     name: "External factors",
     description:
-      "The surrounding context that influences buying decisions.",
+      "The surrounding context that influences your client's buying decisions.",
   },
   {
     id: "communication-worksheet",

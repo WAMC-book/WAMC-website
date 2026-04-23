@@ -1,7 +1,7 @@
 import { NavLink, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import { AMAZON_BOOK_URL } from "@/lib/constants";
+import useAmazonUrl from "@/lib/useAmazonUrl";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -15,6 +15,7 @@ const NAV = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { primary: amazonUrl } = useAmazonUrl();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -71,7 +72,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           <a
-            href={AMAZON_BOOK_URL}
+            href={amazonUrl}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="nav-buy-book-btn"
@@ -114,7 +115,7 @@ export default function Navbar() {
               </NavLink>
             ))}
             <a
-              href={AMAZON_BOOK_URL}
+              href={amazonUrl}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="nav-mobile-buy-btn"
