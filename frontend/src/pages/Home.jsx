@@ -4,8 +4,9 @@ import { ArrowRight, Download, Wrench, FileText, Quote } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import ChapterDownloadModal from "@/components/ChapterDownloadModal";
 import CTASection from "@/components/CTASection";
+import TestimonialsGrid from "@/components/TestimonialsGrid";
 import useAmazonUrl from "@/lib/useAmazonUrl";
-import { TESTIMONIALS } from "@/lib/constants";
+import { useLang } from "@/lib/LanguageContext";
 
 const EXPLORE = [
   "why you may be struggling to clearly define your clients",
@@ -33,7 +34,7 @@ const RESOURCE_CARDS = [
     icon: Quote,
     title: "Quotes",
     body: "Lines from the book you can carry into your week.",
-    to: "/resources",
+    to: "/quotes",
     cta: "View quotes",
   },
 ];
@@ -41,6 +42,7 @@ const RESOURCE_CARDS = [
 export default function Home() {
   const [open, setOpen] = useState(false);
   const { primary: amazonUrl, alt: amazonAlt, altLabel } = useAmazonUrl();
+  const { t } = useLang();
 
   return (
     <div data-testid="home-page" className="bg-white">
@@ -246,28 +248,9 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-12 md:mb-14 max-w-3xl">
-            What early readers are <span className="text-[var(--brand-blue)]">saying</span>
+            {t.testimonials.title} <span className="text-[var(--brand-blue)]">{t.testimonials.titleBlue}</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <figure
-                key={i}
-                data-testid={`testimonial-${i}`}
-                className="bg-white border border-[var(--brand-border)] rounded-md p-7 sm:p-8 flex flex-col"
-              >
-                <Quote className="text-[var(--brand-blue)] mb-5" size={24} />
-                <blockquote className="text-[16px] sm:text-[17px] leading-[1.7] text-[var(--brand-dark)] flex-1">
-                  "{t.quote}"
-                </blockquote>
-                <figcaption className="mt-6 pt-5 border-t border-[var(--brand-border)]">
-                  <div className="font-display uppercase text-sm text-[var(--brand-ink)]">
-                    {t.author}
-                  </div>
-                  <div className="text-xs text-[var(--brand-muted)] mt-1">{t.role}</div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+          <TestimonialsGrid testPrefix="testimonial" />
         </div>
       </section>
 

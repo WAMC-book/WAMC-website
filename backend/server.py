@@ -1,14 +1,16 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import bcrypt
+import jwt
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 ROOT_DIR = Path(__file__).parent
@@ -18,6 +20,11 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Auth config
+JWT_SECRET = os.environ.get('JWT_SECRET', 'dev-secret')
+JWT_ALG = 'HS256'
+ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH', '')
 
 # Create the main app without a prefix
 app = FastAPI(title="Who Are My Clients API")
@@ -30,14 +37,53 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def verify_password(plain: str, hashed: str) -> bool:
+    if not hashed:
+        return False
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+
+def create_token(hours: int = 12) -> str:
+    payload = {
+        "sub": "admin",
+        "role": "admin",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=hours),
+        "type": "access",
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+
+
+async def require_admin(request: Request) -> dict:
+    token = request.cookies.get("wamc_admin")
+    if not token:
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth[7:]
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+        if payload.get("role") != "admin":
+            raise HTTPException(status_code=401, detail="Invalid role")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
 # ---------- Models ----------
 
 class LeadCreate(BaseModel):
     first_name: str = Field(min_length=1, max_length=80)
     last_name: str = Field(min_length=1, max_length=80)
     email: EmailStr
-    role: str = Field(min_length=1, max_length=120)  # entrepreneur status / role
+    role: str = Field(min_length=1, max_length=120)
     source: Optional[str] = "chapter_download"
+    locale: Optional[str] = "en"
 
 
 class Lead(BaseModel):
@@ -48,6 +94,7 @@ class Lead(BaseModel):
     email: str
     role: str
     source: str
+    locale: Optional[str] = "en"
     created_at: str
 
 
@@ -55,6 +102,7 @@ class ContactCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
     message: str = Field(min_length=1, max_length=5000)
+    locale: Optional[str] = "en"
 
 
 class ContactMessage(BaseModel):
@@ -63,7 +111,12 @@ class ContactMessage(BaseModel):
     name: str
     email: str
     message: str
+    locale: Optional[str] = "en"
     created_at: str
+
+
+class LoginPayload(BaseModel):
+    password: str = Field(min_length=1)
 
 
 class Resource(BaseModel):
@@ -74,70 +127,20 @@ class Resource(BaseModel):
     category: str
     link: Optional[str] = None
     image: Optional[str] = None
-    type: str  # "article" | "worksheet" | "tool" | "download"
+    type: str
 
-
-# ---------- Seed resources (static placeholder catalog) ----------
 
 SEED_RESOURCES: List[dict] = [
-    {
-        "id": "r-001",
-        "title": "The Client Clarity Worksheet",
-        "description": "A printable worksheet to map out who you actually serve — and who you don't.",
-        "category": "Worksheet",
-        "link": "#",
-        "image": "/assets/images/stock-crosswalk.jpg",
-        "type": "worksheet",
-    },
-    {
-        "id": "r-002",
-        "title": "10 Questions Before You Launch",
-        "description": "A short reflection guide for early-stage founders who haven't sold yet.",
-        "category": "Guide",
-        "link": "#",
-        "image": "/assets/images/stock-street.jpg",
-        "type": "download",
-    },
-    {
-        "id": "r-003",
-        "title": "How I Misread My First Client",
-        "description": "A short essay on the gap between who you think you're serving and who actually shows up.",
-        "category": "Article",
-        "link": "#",
-        "image": "/assets/images/stock-london.jpg",
-        "type": "article",
-    },
-    {
-        "id": "r-004",
-        "title": "Positioning Map Template",
-        "description": "A one-page canvas to describe your client, their context, and what they are really hiring you for.",
-        "category": "Template",
-        "link": "#",
-        "image": "/assets/images/stock-professionals.jpg",
-        "type": "tool",
-    },
-    {
-        "id": "r-005",
-        "title": "First 3 Chapters of the Book",
-        "description": "Start reading today. A free preview of \"Who Are My Clients?\"",
-        "category": "Book Preview",
-        "link": "#chapters",
-        "image": "/assets/images/book-cover.png",
-        "type": "download",
-    },
-    {
-        "id": "r-006",
-        "title": "Reader Questions — Answered",
-        "description": "A growing list of questions from readers, with short, honest answers.",
-        "category": "Article",
-        "link": "#",
-        "image": "/assets/images/stock-crosswalk.jpg",
-        "type": "article",
-    },
+    {"id": "r-001", "title": "The Client Clarity Worksheet", "description": "A printable worksheet to map out who you actually serve — and who you don't.", "category": "Worksheet", "link": "#", "image": "/assets/images/stock-crosswalk.jpg", "type": "worksheet"},
+    {"id": "r-002", "title": "10 Questions Before You Launch", "description": "A short reflection guide for early-stage founders who haven't sold yet.", "category": "Guide", "link": "#", "image": "/assets/images/stock-street.jpg", "type": "download"},
+    {"id": "r-003", "title": "How I Misread My First Client", "description": "A short essay on the gap between who you think you're serving and who actually shows up.", "category": "Article", "link": "#", "image": "/assets/images/stock-london.jpg", "type": "article"},
+    {"id": "r-004", "title": "Positioning Map Template", "description": "A one-page canvas to describe your client and what they are really hiring you for.", "category": "Template", "link": "#", "image": "/assets/images/stock-professionals.jpg", "type": "tool"},
+    {"id": "r-005", "title": "First 3 Chapters of the Book", "description": "Start reading today. A free preview of \"Who Are My Clients?\"", "category": "Book Preview", "link": "#chapters", "image": "/assets/images/book-cover.png", "type": "download"},
+    {"id": "r-006", "title": "Reader Questions — Answered", "description": "A growing list of questions from readers, with short, honest answers.", "category": "Article", "link": "#", "image": "/assets/images/stock-crosswalk.jpg", "type": "article"},
 ]
 
 
-# ---------- Routes ----------
+# ---------- Public Routes ----------
 
 @api_router.get("/")
 async def root():
@@ -153,16 +156,11 @@ async def create_lead(payload: LeadCreate):
         "email": payload.email.lower().strip(),
         "role": payload.role.strip(),
         "source": payload.source or "chapter_download",
+        "locale": (payload.locale or "en").lower(),
         "created_at": now_iso(),
     }
     await db.leads.insert_one(doc.copy())
     return Lead(**doc)
-
-
-@api_router.get("/leads", response_model=List[Lead])
-async def list_leads():
-    items = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    return [Lead(**i) for i in items]
 
 
 @api_router.post("/contact", response_model=ContactMessage)
@@ -172,16 +170,11 @@ async def create_contact(payload: ContactCreate):
         "name": payload.name.strip(),
         "email": payload.email.lower().strip(),
         "message": payload.message.strip(),
+        "locale": (payload.locale or "en").lower(),
         "created_at": now_iso(),
     }
     await db.contact_messages.insert_one(doc.copy())
     return ContactMessage(**doc)
-
-
-@api_router.get("/contact", response_model=List[ContactMessage])
-async def list_contact():
-    items = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    return [ContactMessage(**i) for i in items]
 
 
 @api_router.get("/resources", response_model=List[Resource])
@@ -190,6 +183,62 @@ async def list_resources(category: Optional[str] = None):
     if category and category.lower() != "all":
         items = [r for r in items if r["category"].lower() == category.lower()]
     return [Resource(**r) for r in items]
+
+
+# ---------- Admin Routes ----------
+
+@api_router.post("/admin/login")
+async def admin_login(payload: LoginPayload, response: Response):
+    if not verify_password(payload.password, ADMIN_PASSWORD_HASH):
+        raise HTTPException(status_code=401, detail="Invalid password")
+    token = create_token(hours=12)
+    response.set_cookie(
+        key="wamc_admin",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=12 * 3600,
+        path="/",
+    )
+    return {"ok": True, "token": token}
+
+
+@api_router.post("/admin/logout")
+async def admin_logout(response: Response):
+    response.delete_cookie("wamc_admin", path="/")
+    return {"ok": True}
+
+
+@api_router.get("/admin/me")
+async def admin_me(_: dict = Depends(require_admin)):
+    return {"ok": True, "role": "admin"}
+
+
+@api_router.get("/admin/leads", response_model=List[Lead])
+async def admin_list_leads(_: dict = Depends(require_admin)):
+    items = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    return [Lead(**i) for i in items]
+
+
+@api_router.get("/admin/contacts", response_model=List[ContactMessage])
+async def admin_list_contacts(_: dict = Depends(require_admin)):
+    items = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    return [ContactMessage(**i) for i in items]
+
+
+@api_router.get("/admin/stats")
+async def admin_stats(_: dict = Depends(require_admin)):
+    leads_count = await db.leads.count_documents({})
+    contacts_count = await db.contact_messages.count_documents({})
+    # breakdown by locale
+    en_leads = await db.leads.count_documents({"locale": "en"})
+    fr_leads = await db.leads.count_documents({"locale": "fr"})
+    return {
+        "leads_total": leads_count,
+        "contacts_total": contacts_count,
+        "leads_by_locale": {"en": en_leads, "fr": fr_leads},
+    }
 
 
 # Include the router in the main app
@@ -203,11 +252,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 

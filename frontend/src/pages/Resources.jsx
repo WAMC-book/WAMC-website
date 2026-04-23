@@ -24,10 +24,9 @@ const SECTIONS = [
     icon: Quote,
     title: "Quotes",
     body: "Lines from the book to carry into your week, share with a co-founder, or sit with on your own.",
-    to: "#",
+    to: "/quotes",
     cta: "View quotes",
     testid: "resources-quotes",
-    placeholder: true,
   },
 ];
 

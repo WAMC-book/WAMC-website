@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowRight, Download, Quote } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import ChapterDownloadModal from "@/components/ChapterDownloadModal";
 import CTASection from "@/components/CTASection";
+import TestimonialsGrid from "@/components/TestimonialsGrid";
 import useAmazonUrl from "@/lib/useAmazonUrl";
-import { BOOK, AUTHOR, TESTIMONIALS } from "@/lib/constants";
+import { BOOK, AUTHOR } from "@/lib/constants";
 
 const GAINS = [
   "a clearer understanding of who your clients really are",
@@ -213,28 +214,9 @@ export default function Book() {
         <div className="max-w-[1280px] mx-auto px-6 lg:px-10">
           <span className="rule-accent mb-5 block" />
           <h2 className="font-display uppercase text-[36px] sm:text-5xl leading-[0.95] text-[var(--brand-ink)] mb-12 md:mb-14 max-w-3xl">
-            Early readers
+            Readers
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <figure
-                key={i}
-                data-testid={`book-testimonial-${i}`}
-                className="bg-white border border-[var(--brand-border)] rounded-md p-7 sm:p-8 flex flex-col"
-              >
-                <Quote className="text-[var(--brand-blue)] mb-5" size={24} />
-                <blockquote className="text-[16px] sm:text-[17px] leading-[1.7] text-[var(--brand-dark)] flex-1">
-                  "{t.quote}"
-                </blockquote>
-                <figcaption className="mt-6 pt-5 border-t border-[var(--brand-border)]">
-                  <div className="font-display uppercase text-sm text-[var(--brand-ink)]">
-                    {t.author}
-                  </div>
-                  <div className="text-xs text-[var(--brand-muted)] mt-1">{t.role}</div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+          <TestimonialsGrid testPrefix="book-testimonial" />
         </div>
       </section>
 
